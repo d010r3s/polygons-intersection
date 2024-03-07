@@ -30,13 +30,13 @@
 
 #### Methods used:
 * [A](https://)
-###### Tridiagonal matrix algorithm
+###### B
 ![B](https://.png)
-* [Fitting parametric cubic splines to a set of points](https://)
-###### Fitting parametric cubic spline to a set of points
-![C](https://.png)
+* [C](https://)
+###### D
+![D](https://.png)
 
-## Intersection point of two splines and minimum distance between two splines
+## A
 
 #### Methods used:
 * [A](https://)
