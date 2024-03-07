@@ -170,6 +170,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     intersectionPoints = findIntersections(triangles[0], triangles[1]);
 
     while (!bQuit) {
+        glColor3f(1.0f, 1.0f, 1.0f);
+
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) {
                 bQuit = TRUE;
@@ -180,6 +182,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         } else {
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
+            float tick = 0.1f / 10.0f;
+
+            // засечки по X
+            for(float i = -10.0f; i <= 11.0f; i += 1.0f) {
+                glBegin(GL_LINES);
+                glVertex2f(i / 10.0f, -tick);
+                glVertex2f(i / 10.0f, tick);
+                glEnd();
+            }
+
+            // засечки по Y
+            for(float i = -10.0f; i <= 11.0f; i += 1.0f) {
+                glBegin(GL_LINES);
+                glVertex2f(-tick, i / 10.0f);
+                glVertex2f(tick, i / 10.0f);
+                glEnd();
+            }
+
+            // ось Х
+            glBegin(GL_LINES);
+            glVertex2f(-10.0f / 10.0f, 0.0f);
+            glVertex2f(11.0f / 10.0f, 0.0f);
+            glEnd();
+
+            // ось Y
+            glBegin(GL_LINES);
+            glVertex2f(0.0f, -10.0f / 10.0f);
+            glVertex2f(0.0f, 11.0f / 10.0f);
+            glEnd();
 
             // 1й треугольник
             glBegin(GL_TRIANGLES);
