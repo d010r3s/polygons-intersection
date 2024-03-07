@@ -1,4 +1,4 @@
-# Splines - 1st AMI's sophomore year c++ project 
+# Polygons Intersection - 1st AMI's sophomore year c++ project 
 :robot:
 ## Table of contents
 * [Terms of reference](#terms-of-reference)
@@ -38,13 +38,10 @@ t = s - s0
 ```
 , 
 
-where s0 represents the value of the independent variable s at the beginning of the segment. For convenience,
-we’ve made a variable substitution t = s - s0.
+where s0 represents the value of 
 
 [source](https://www.physicsforums.com/attachments/parametric-spline-tutorialv2-pdf.12898/) 
 
-
-![Parametric cubic spline](https://i.stack.imgur.com/7hbgQ.png)
 
 #### Methods used:
 * [Tridiagonal matrix algorithm](https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm)
