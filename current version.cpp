@@ -28,9 +28,11 @@ Point Centroid(const std::vector<Point>& points) {
     centroid.y = sumY / points.size();
     return centroid;
 }
+
 double calculateAngle(const Point& centroid, const Point& point) {
     return atan2(point.y - centroid.y, point.x - centroid.x);
 }
+
 void sortPoints(std::vector<Point>& points) {
     Point centroid = Centroid(points);
     std::sort(points.begin(), points.end(), [&centroid](const Point& a, const Point& b) {
@@ -86,28 +88,20 @@ std::vector<Point> findIntersections(const std::vector<Point>& triangle1, const 
     return intersections;
 }
 
-std::vector<std::vector<Point>> triangles = {
-        {{3, 6}, {7, 5}, {4, 1}},
-        {{5, 4}, {6, 8}, {10, 5}}
-};
-
-std::vector<Point> intersectionPoints;
+std::vector<std::vector<Point>> triangles = {{{0, 0}, {6, 0}, {3, 6}}, {{2, 2}, {4, 2}, {3, 4}}, {{2, 2}, {-4, -2}, {-3, -4}}, {{-2, -2}, {4, 2}, {3, 4}}, {{5, 5}, {4, 6}, {-1, -2}}};
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CLOSE:
             PostQuitMessage(0);
             return 0;
-
         case WM_DESTROY:
             return 0;
-
         case WM_KEYDOWN:
             if (wParam == VK_ESCAPE) {
                 PostQuitMessage(0);
             }
             return 0;
-
         default:
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
@@ -164,14 +158,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     RegisterClassEx(&wcex);
 
-    hwnd = CreateWindowEx(0, "Triangle", "Triangles", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 256, 256, NULL, NULL, hInstance, NULL);
+    hwnd = CreateWindowEx(0, "Triangle", "Triangles", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 680, 680, NULL, NULL, hInstance, NULL);
     ShowWindow(hwnd, nCmdShow);
+
     EnableOpenGL(hwnd, &hDC, &hRC);
-    intersectionPoints = findIntersections(triangles[0], triangles[1]);
 
     while (!bQuit) {
-        glColor3f(1.0f, 1.0f, 1.0f);
-
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             if (msg.message == WM_QUIT) {
                 bQuit = TRUE;
@@ -211,24 +203,31 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             glVertex2f(0.0f, -10.0f / 10.0f);
             glVertex2f(0.0f, 11.0f / 10.0f);
             glEnd();
+            float colorIncrement = 1.0f / (triangles.size() + 1);
+            for (size_t i = 0; i < triangles.size(); ++i) {
+                glBegin(GL_TRIANGLES);
+                glColor3f((i + 1) * colorIncrement, 0.0f, 0.0f); // каждый треугольник нового цвета
+                for (const auto& point : triangles[i]) glVertex2f(point.x / 10.0f, point.y / 10.0f);
+                glEnd();
+            }
 
-            // 1й треугольник
-            glBegin(GL_TRIANGLES);
-            glColor3f(1.0f, 0.0f, 0.0f);
-            for (const auto& point : triangles[0]) glVertex2f(point.x / 10.0f, point.y / 10.0f);
-            glEnd();
-
-            // 2й треугольник
-            glBegin(GL_TRIANGLES);
-            glColor3f(0.0f, 1.0f, 0.0f);
-            for (const auto& point : triangles[1]) glVertex2f(point.x / 10.0f, point.y / 10.0f);
-            glEnd();
-
-            glBegin(GL_POLYGON);
-            sortPoints(intersectionPoints);
-            glColor3f(0.0f, 0.0f, 1.0f);
-            for (const auto& point : intersectionPoints) glVertex2f(point.x / 10.0f, point.y / 10.0f);
-            glEnd();
+            std::vector<std::vector<Point>> intersections;
+            for (size_t i = 0; i < triangles.size() - 1; ++i) {
+                for (size_t j = i + 1; j < triangles.size(); ++j) {
+                    auto currentIntersection = findIntersections(triangles[i], triangles[j]);
+                    if (!currentIntersection.empty()) {
+                        sortPoints(currentIntersection);
+                        intersections.push_back(currentIntersection);
+                    }
+                }
+            }
+            colorIncrement = 1.0f / (intersections.size() + 1);
+            for (size_t i = 0; i < intersections.size(); ++i) {
+                glBegin(GL_POLYGON);
+                glColor3f(colorIncrement * (i + 1), 0.0f, 1.0f); // каждая область пересечения нового цвета
+                for (const auto& point : intersections[i]) glVertex2f(point.x / 10.0f, point.y / 10.0f);
+                glEnd();
+            }
 
             SwapBuffers(hDC);
         }
