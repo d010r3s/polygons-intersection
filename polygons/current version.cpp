@@ -366,7 +366,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     else {
         std::cout << "Coordinates of the general intersection area:" << std::endl;
         for (const auto &point : generalIntersection) {
-            std::cout << "(" << point.x << ", " << point.y << ")" << std::endl;
+            std::cout << "(" << fixNegZero(point.x) << ", " << fixNegZero(point.y) << ")" << std::endl;
         }
     }
     return msg.wParam;
