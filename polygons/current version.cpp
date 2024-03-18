@@ -170,15 +170,15 @@ void sortPoints(std::vector<Point>& points) {
 }
 
 
-std::vector<std::vector<Point>> triangles = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
+std::vector<std::vector<Point>> polygons = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
                                              {{4, -4}, {-7, -2}, {5, 4}},
                                              {{2, 2}, {4, 2}, {4,4}, {2, 4}},
                                              {{1, 1}, {3, 1}, {3, 3}, {1, 3}},
                                              };
 std::vector<Point> general_inter() {
-    std::vector<Point> inter = findIntersections(triangles[0], triangles[1]);
-    for (int i = 2; i < triangles.size(); i++) {
-        inter = findIntersections(inter, triangles[i]);
+    std::vector<Point> inter = findIntersections(polygons[0], polygons[1]);
+    for (int i = 2; i < polygons.size(); i++) {
+        inter = findIntersections(inter, polygons[i]);
         if (inter.empty()) {
             std::cout << "General intersection is empty" << std::endl;
             return {};
@@ -257,12 +257,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
     wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wcex.lpszMenuName = NULL;
-    wcex.lpszClassName = "Triangle";
+    wcex.lpszClassName = "Polygon";
     wcex.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
     RegisterClassEx(&wcex);
 
-    hwnd = CreateWindowEx(0, "Triangle", "Triangles", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 680, 680, NULL, NULL, hInstance, NULL);
+    hwnd = CreateWindowEx(0, "Polygon", "Polygons", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 680, 680, NULL, NULL, hInstance, NULL);
     ShowWindow(hwnd, nCmdShow);
 
     EnableOpenGL(hwnd, &hDC, &hRC);
@@ -284,11 +284,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             float tick = 0.1f / 10.0f;
 
 
-            float colorIncrement = 1.0f / (triangles.size() + 1);
-            for (size_t i = 0; i < triangles.size(); ++i) {
+            float colorIncrement = 1.0f / (polygons.size() + 1);
+            for (size_t i = 0; i < polygons.size(); ++i) {
                 glBegin(GL_POLYGON);
                 glColor4f((i + 1) * colorIncrement, 0.0f, 0.0f, 0.5f);
-                for (const auto& point : triangles[i]) {
+                for (const auto& point : polygons[i]) {
                     glVertex2f(point.x / 10.0f, point.y / 10.0f);
                 }
                 glEnd();
@@ -296,9 +296,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
             std::vector<std::vector<Point>> intersections;
 
-            for (size_t i = 0; i < triangles.size(); ++i) {
-                for (size_t j = i + 1; j < triangles.size(); ++j) {
-                    auto currentIntersection = findIntersections(triangles[i], triangles[j]);
+            for (size_t i = 0; i < polygons.size(); ++i) {
+                for (size_t j = i + 1; j < polygons.size(); ++j) {
+                    auto currentIntersection = findIntersections(polygons[i], polygons[j]);
                     if (!currentIntersection.empty()) {
                         sortPoints(currentIntersection);
                         intersections.push_back(currentIntersection);
