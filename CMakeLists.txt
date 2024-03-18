@@ -5,6 +5,4 @@ find_package(GLUT REQUIRED)
 
 add_executable(untitled5 main.cpp)
 
-target_link_libraries(untitled5 ${OPENGL_LIBRARIES})
-target_link_libraries(untitled5 ${GULT_LIBRARIES})
-target_link_libraries(untitled5 -lopengl32 -g -lfreeglut)
+target_link_libraries(untitled5 ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} -lopengl32 -lfreeglut)
