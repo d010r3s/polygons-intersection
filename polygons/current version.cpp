@@ -170,17 +170,19 @@ void sortPoints(std::vector<Point>& points) {
 }
 
 
-std::vector<std::vector<Point>> polygons = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
-                                             {{4, -4}, {-7, -2}, {5, 4}},
-                                             {{2, 2}, {4, 2}, {4,4}, {2, 4}},
-                                             {{1, 1}, {3, 1}, {3, 3}, {1, 3}},
-                                             };
+std::vector<std::vector<Point>> polygons = {
+        {{0, 0}, {3, 0}, {4, 2}, {3, 4}, {0, 4}, {-1, 2}}, // Шестиугольник
+        {{1, 1}, {2, 1}, {1.5, 2}},                        // Треугольник
+        {{2, 2}, {3, 2}, {3, 3}, {2, 3}},                  // Квадрат
+        {{1, 3}, {2, 3.5}, {3, 3}, {2.5, 2}, {1.5, 2}}     // Пятиугольник
+};
+
+
 std::vector<Point> general_inter() {
     std::vector<Point> inter = findIntersections(polygons[0], polygons[1]);
     for (int i = 2; i < polygons.size(); i++) {
         inter = findIntersections(inter, polygons[i]);
         if (inter.empty()) {
-            std::cout << "General intersection is empty" << std::endl;
             return {};
         }
     }
@@ -358,10 +360,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     DisableOpenGL(hwnd, hDC, hRC);
     DestroyWindow(hwnd);
     std::vector<Point> generalIntersection = general_inter();
-    std::cout << "Coordinates of the general intersection area:" << std::endl;
-    for (const auto& point : generalIntersection) {
-        std::cout << "(" << point.x << ", " << point.y << ")" << std::endl;
+    if (generalIntersection.empty()) {
+        std::cout << "General intersection is empty" << std::endl;
     }
-
+    else {
+        std::cout << "Coordinates of the general intersection area:" << std::endl;
+        for (const auto &point : generalIntersection) {
+            std::cout << "(" << point.x << ", " << point.y << ")" << std::endl;
+        }
+    }
     return msg.wParam;
 }
