@@ -4,16 +4,44 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <unordered_set>
+#include <iomanip>
 
 struct Point {
     double x, y;
     Point(double x = 0, double y = 0) : x(x), y(y) {}
 };
+
 bool comparePoints(Point first_point, Point second_point) {
     return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
+}
+
+bool operator == (const Point& point, const Point& point2) {
+    return point.x == point2.x && point.y == point2.y;
+}
+
+double fixNegZero(double value) {
+    if (value == 0.0) {
+        return 0.0;
+    }
+    return value;
+}
+
+std::vector<Point> delete_duplicates(const std::vector<Point>& points) { //n^2
+    std::vector<Point> res;
+    bool flag = true;
+    for(int i = 0; i < points.size(); i++){
+        Point temp = points[i];
+        flag = true;
+        for(int j = i+1; j < points.size(); j++) {
+            if(temp == points[j]){
+                flag = false;
+            }
+        }
+        if(flag) {
+            res.push_back(temp);
+        }
+    }
+    return res;
 }
 
 int compare_relatively_min(Point min_p, Point q, Point r) {
@@ -21,7 +49,7 @@ int compare_relatively_min(Point min_p, Point q, Point r) {
     if (res == 0) {
         return 0;
     }
-    if (res > 0){
+    if (res > 0) {
         return 1;
     }
     return 2;
@@ -112,16 +140,20 @@ std::vector<Point> findIntersections(const std::vector<Point>& poligon1, const s
             intersections.push_back(vertex);
         }
     }
-    sortVertex(intersections);
-    std::vector<Point> res_inter = {intersections[0]};
+    if (!(intersections.empty())) {
+        sortVertex(intersections);
+        intersections = delete_duplicates(intersections);
+    }
+    /*std::vector<Point> res_inter = {intersections[0]};
     for (int i = 0; i < intersections.size()-1; i++){
         if (intersections[i].x != intersections[i+1].x || intersections[i].y != intersections[i+1].y){
             res_inter.push_back(intersections[i+1]);
         }
-    }
+    }*/
 
 
-    return res_inter;
+
+    return intersections;
 }
 
 Point Centroid(const std::vector<Point>& points) {
@@ -150,23 +182,28 @@ void sortPoints(std::vector<Point>& points) {
 
 
 
-std::vector<std::vector<Point>> triangles = {
-        {{-4,-4}, {-3, 6}, {5, 6}},
-        {{-2, 3}, {4, 9}, {4, 2}},
-        {{1, -3}, {1, 7}, {7, 4}}
-};
+std::vector<std::vector<Point>> triangles = {{{6, 0}, {3, 6}, {0,0}},
+                                             {{1, 0}, {1, 5}, {6,0}},
+
+                                             {{4, -4}, {7, -2}, {5, 4}}};
 void general_inter(){ // нахождение общей фигуры пересечения и вывод вершин
     std::vector<Point> inter = findIntersections(triangles[0], triangles[1]);
 
-    std::cout<<"---"<<std::endl;
+
     for (int i = 2; i < triangles.size(); i++){
         inter = findIntersections(inter, triangles[i]);
-
-
-
+        if (inter.empty()){
+            std::cout<<"General intersection is empty" << std::endl;
+            break;
         }
-    for (int i = 0; i < inter.size(); i++){
-        std::cout<<inter[i].x << ' ' << inter[i].y << std::endl;
+
+
+
+    }
+    if (!(inter.empty())){
+        for (int i = 0; i < inter.size(); i++){
+            std::cout << std::fixed << std::setprecision(3) << fixNegZero(inter[i].x) << ' ' << fixNegZero(inter[i].y) << std::endl;
+        }
     }
 }
 
