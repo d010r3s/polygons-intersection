@@ -3,157 +3,18 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <iostream>
-#include <iomanip>
 
 struct Point {
     double x, y;
     Point(double x = 0, double y = 0) : x(x), y(y) {}
 };
 
-bool comparePoints(Point first_point, Point second_point) {
-    return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
-}
-
-bool operator == (const Point& point, const Point& point2) {
-    return point.x == point2.x && point.y == point2.y;
-}
-
-double fixNegZero(double value) {
-    if (value == 0.0) {
-        return 0.0;
-    }
-    return value;
-}
-
-std::vector<Point> delete_duplicates(const std::vector<Point>& points) { //n^2
-    std::vector<Point> res;
-    bool flag = true;
-    for(int i = 0; i < points.size(); i++){
-        Point temp = points[i];
-        flag = true;
-        for(int j = i+1; j < points.size(); j++) {
-            if(temp == points[j]){
-                flag = false;
-            }
-        }
-        if(flag) {
-            res.push_back(temp);
-        }
-    }
-    return res;
-}
-
-int compare_relatively_min(Point min_p, Point q, Point r) {
-    int res = (q.y - min_p.y) * (r.x - q.x) - (q.x - min_p.x) * (r.y - q.y);
-    if (res == 0) {
-        return 0;
-    }
-    if (res > 0) {
-        return 1;
-    }
-    return 2;
-
-}
-
-void sortVertex(std::vector<Point>& points) { // сортировка вершин многоугольника против часовой стрелки
-    std::sort(points.begin(), points.end(), comparePoints);
-
-    Point p0 = points[0];
-    std::sort(points.begin() + 1, points.end(), [p0](Point a, Point b) {
-        int res = compare_relatively_min(p0, a, b);
-        if (res == 0) {
-            return (a.x + a.y < b.x + b.y);
-        }
-        return (res == 2);
-    });
-}
-
-
-
-bool isPointInsidePoligon(const std::vector<Point>& points, const Point& c) {
-    bool res = false;
-    Point p1 = points[0];
-    Point p2;
-    for (int i = 1; i <= points.size(); i++) {
-        p2 = points[i % points.size()];
-        if (c.y > std::min(p1.y, p2.y)) {
-            if (c.y <= std::max(p1.y, p2.y)) {
-                if (c.x <= std::max(p1.x, p2.x)) {
-                    double x_intersection = (c.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                    if (p1.x == p2.x || c.x <= x_intersection) {
-                        res = !res;
-                    }
-                }
-            }
-        }
-
-
-        p1 = p2;
-    }
-    return res;
-}
-std::pair<bool, Point> findIntersection(const Point& A, const Point& B, const Point& C, const Point& D) {
-    double a1 = B.y - A.y;
-    double b1 = A.x - B.x;
-    double c1 = a1 * A.x + b1 * A.y;
-
-    double a2 = D.y - C.y;
-    double b2 = C.x - D.x;
-    double c2 = a2 * C.x + b2 * C.y;
-
-    double delta = a1 * b2 - a2 * b1;
-    if (std::fabs(delta) < 1e-9) {
-        return {false, {}};
-    }
-
-    double x = (b2 * c1 - b1 * c2) / delta;
-    double y = (a1 * c2 - a2 * c1) / delta;
-
-    if (x < std::min(A.x, B.x) || x > std::max(A.x, B.x) || x < std::min(C.x, D.x) || x > std::max(C.x, D.x) ||
-        y < std::min(A.y, B.y) || y > std::max(A.y, B.y) || y < std::min(C.y, D.y) || y > std::max(C.y, D.y)) {
-        return {false, {}};
-    }
-
-    return {true, {x, y}};
-}
-std::vector<Point> findIntersections(const std::vector<Point>& poligon1, const std::vector<Point>& poligon2) {
-    std::vector<Point> intersections;
-    for (int i = 0; i < poligon1.size(); ++i) {
-        for (int j = 0; j < poligon2.size(); ++j) {
-            auto result = findIntersection(poligon1[i], poligon1[(i + 1) % poligon1.size()], poligon2[j],poligon2[(j + 1) % poligon2.size()]);
-            if (result.first) {
-
-                intersections.push_back(result.second);
-
-            }
-
-        }
-    }
-    for (const auto& vertex : poligon1) {
-        if (isPointInsidePoligon(poligon2, vertex)) {
-            intersections.push_back(vertex);
-        }
-    }
-    for (const auto& vertex : poligon2) {
-        if (isPointInsidePoligon(poligon1, vertex)) {
-            intersections.push_back(vertex);
-        }
-    }
-    if (!(intersections.empty())) {
-        sortVertex(intersections);
-        intersections = delete_duplicates(intersections);
-    }
-    /*std::vector<Point> res_inter = {intersections[0]};
-    for (int i = 0; i < intersections.size()-1; i++){
-        if (intersections[i].x != intersections[i+1].x || intersections[i].y != intersections[i+1].y){
-            res_inter.push_back(intersections[i+1]);
-        }
-    }*/
-
-
-
-    return intersections;
+bool isPointInsideTriangle(const Point& p, const Point& a, const Point& b, const Point& c) {
+    double areaOrig = std::abs(a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y));
+    double area1 = std::abs(p.x * (b.y - c.y) + b.x * (c.y - p.y) + c.x * (p.y - b.y));
+    double area2 = std::abs(a.x * (p.y - c.y) + p.x * (c.y - a.y) + c.x * (a.y - p.y));
+    double area3 = std::abs(a.x * (b.y - p.y) + b.x * (p.y - a.y) + p.x * (a.y - b.y));
+    return std::abs(areaOrig - (area1 + area2 + area3)) < 1e-9;
 }
 
 Point Centroid(const std::vector<Point>& points) {
@@ -179,34 +40,55 @@ void sortPoints(std::vector<Point>& points) {
     });
 }
 
+std::pair<bool, Point> findIntersection(const Point& A, const Point& B, const Point& C, const Point& D) {
+    double a1 = B.y - A.y;
+    double b1 = A.x - B.x;
+    double c1 = a1 * A.x + b1 * A.y;
 
+    double a2 = D.y - C.y;
+    double b2 = C.x - D.x;
+    double c2 = a2 * C.x + b2 * C.y;
 
-
-std::vector<std::vector<Point>> triangles = {{{6, 0}, {3, 6}, {0,0}},
-                                             {{1, 0}, {1, 5}, {6,0}},
-
-                                             {{4, -4}, {7, -2}, {5, 4}}};
-void general_inter(){ // нахождение общей фигуры пересечения и вывод вершин
-    std::vector<Point> inter = findIntersections(triangles[0], triangles[1]);
-
-
-    for (int i = 2; i < triangles.size(); i++){
-        inter = findIntersections(inter, triangles[i]);
-        if (inter.empty()){
-            std::cout<<"General intersection is empty" << std::endl;
-            break;
-        }
-
-
-
+    double delta = a1 * b2 - a2 * b1;
+    if (std::fabs(delta) < 1e-9) {
+        return {false, {}};
     }
-    if (!(inter.empty())){
-        for (int i = 0; i < inter.size(); i++){
-            std::cout << std::fixed << std::setprecision(3) << fixNegZero(inter[i].x) << ' ' << fixNegZero(inter[i].y) << std::endl;
-        }
+
+    double x = (b2 * c1 - b1 * c2) / delta;
+    double y = (a1 * c2 - a2 * c1) / delta;
+
+    if (x < std::min(A.x, B.x) || x > std::max(A.x, B.x) || x < std::min(C.x, D.x) || x > std::max(C.x, D.x) ||
+        y < std::min(A.y, B.y) || y > std::max(A.y, B.y) || y < std::min(C.y, D.y) || y > std::max(C.y, D.y)) {
+        return {false, {}};
     }
+
+    return {true, {x, y}};
 }
 
+std::vector<Point> findIntersections(const std::vector<Point>& triangle1, const std::vector<Point>& triangle2) {
+    std::vector<Point> intersections;
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            auto result = findIntersection(triangle1[i], triangle1[(i + 1) % 3], triangle2[j], triangle2[(j + 1) % 3]);
+            if (result.first) {
+                intersections.push_back(result.second);
+            }
+        }
+    }
+    for (const auto& vertex : triangle1) {
+        if (isPointInsideTriangle(vertex, triangle2[0], triangle2[1], triangle2[2])) {
+            intersections.push_back(vertex);
+        }
+    }
+    for (const auto& vertex : triangle2) {
+        if (isPointInsideTriangle(vertex, triangle1[0], triangle1[1], triangle1[2])) {
+            intersections.push_back(vertex);
+        }
+    }
+    return intersections;
+}
+
+std::vector<std::vector<Point>> triangles = {{{0, 0}, {6, 0}, {3, 6}}, {{2, 2}, {4, 2}, {3, 4}}, {{2, 2}, {-4, -2}, {-3, -4}}, {{-2, -2}, {4, 2}, {3, 4}}, {{5, 5}, {4, 6}, {-1, -2}}};
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
@@ -338,7 +220,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                         intersections.push_back(currentIntersection);
                     }
                 }
-
             }
             colorIncrement = 1.0f / (intersections.size() + 1);
             for (size_t i = 0; i < intersections.size(); ++i) {
@@ -354,7 +235,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     DisableOpenGL(hwnd, hDC, hRC);
     DestroyWindow(hwnd);
-    general_inter();
 
     return msg.wParam;
 }
