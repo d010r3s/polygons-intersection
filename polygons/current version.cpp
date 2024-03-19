@@ -11,6 +11,9 @@ struct Point {
     double x, y;
     Point(double x = 0, double y = 0) : x(x), y(y) {}
 };
+
+
+
 bool comparePoints(Point first_point, Point second_point) {
     return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
 }
@@ -25,6 +28,16 @@ double fixNegZero(double value) {
         return 0.0;
     }
     return value;
+}
+bool is_point_on_line(const Point t0, const Point t1, const Point a){
+    double eq1 = (a.x - t0.x)/(t1.x - t0.x);
+    double eq2 = (a.y - t0.y)/(t1.y - t0.y);
+    if ((eq1 == eq2) || (a.x == t0.x && a.x == t1.x)){
+        return false;
+    }
+
+    return true;
+
 }
 
 std::vector<Point> delete_duplicates(const std::vector<Point>& points){ //n^2
@@ -44,6 +57,8 @@ std::vector<Point> delete_duplicates(const std::vector<Point>& points){ //n^2
     }
     return res;
 }
+
+
 
 int compare_relatively_min(Point min_p, Point q, Point r) {
     int res = (q.y - min_p.y) * (r.x - q.x) - (q.x - min_p.x) * (r.y - q.y);
@@ -170,13 +185,13 @@ void sortPoints(std::vector<Point>& points) {
 }
 
 
-std::vector<std::vector<Point>> polygons = {
-        {{0, 0}, {3, 0}, {4, 2}, {3, 4}, {0, 4}, {-1, 2}}, // Шестиугольник
-        {{1, 1}, {2, 1}, {1.5, 2}},                        // Треугольник
-        {{2, 2}, {3, 2}, {3, 3}, {2, 3}},                  // Квадрат
-        {{1, 3}, {2, 3.5}, {3, 3}, {2.5, 2}, {1.5, 2}}     // Пятиугольник
-};
 
+
+std::vector<std::vector<Point>> polygons = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
+                                            {{4, -4}, {-7, -2}, {5, 4}},
+                                            {{2, 2}, {4, 2}, {4,4}, {2, 4}},
+                                            {{1, 1}, {3, 1}, {3, 3}, {1, 3}},
+};
 
 std::vector<Point> general_inter() {
     std::vector<Point> inter = findIntersections(polygons[0], polygons[1]);
@@ -365,8 +380,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     }
     else {
         std::cout << "Coordinates of the general intersection area:" << std::endl;
-        for (const auto &point : generalIntersection) {
-            std::cout << "(" << fixNegZero(point.x) << ", " << fixNegZero(point.y) << ")" << std::endl;
+        for (int i = 0; i < generalIntersection.size(); i++) {
+            if (i > 0){
+                if (is_point_on_line(generalIntersection[i - 1],
+                                      generalIntersection[(i + 1) % generalIntersection.size()],
+                                      generalIntersection[i])){
+                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
+                }
+            }
+            else{
+                if (is_point_on_line(generalIntersection[generalIntersection.size() - 1], generalIntersection[0], generalIntersection[1])){
+                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
+                }
+            }
+
         }
     }
     return msg.wParam;
