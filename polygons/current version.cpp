@@ -4,15 +4,29 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
-#include <iomanip>
-
+#include <sstream>
 
 struct Point {
     double x, y;
     Point(double x = 0, double y = 0) : x(x), y(y) {}
 };
 
+std::vector<std::vector<Point>> polygons;
 
+void addPolygon(const std::string& input) { // парсер
+    std::vector<Point> polygon;
+    std::istringstream iss(input);
+    std::string token;
+    std::getline(iss, token, '(');
+    while (std::getline(iss, token, ',')) {
+        double x = std::stod(token);
+        if (!std::getline(iss, token, ','))
+            break;
+        double y = std::stod(token);
+        polygon.push_back(Point(x, y));
+    }
+    polygons.push_back(polygon);
+}
 
 bool comparePoints(Point first_point, Point second_point) {
     return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
@@ -109,6 +123,7 @@ bool isPointInsidePolygon(const std::vector<Point>& points, const Point& c) {
     }
     return res;
 }
+
 std::pair<bool, Point> findIntersection(const Point& A, const Point& B, const Point& C, const Point& D) {
     double a1 = B.y - A.y;
     double b1 = A.x - B.x;
@@ -133,6 +148,7 @@ std::pair<bool, Point> findIntersection(const Point& A, const Point& B, const Po
 
     return {true, {x, y}};
 }
+
 std::vector<Point> findIntersections(const std::vector<Point>& polygon1, const std::vector<Point>& polygon2) {
     std::vector<Point> intersections;
     for (int i = 0; i < polygon1.size(); ++i) {
@@ -185,13 +201,11 @@ void sortPoints(std::vector<Point>& points) {
 }
 
 
-
-
-std::vector<std::vector<Point>> polygons = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
-                                            {{4, -4}, {-7, -2}, {5, 4}},
-                                            {{2, 2}, {4, 2}, {4,4}, {2, 4}},
-                                            {{1, 1}, {3, 1}, {3, 3}, {1, 3}},
-};
+//std::vector<std::vector<Point>> polygons = {{{1, 1}, {2, 3}, {4, 3}, {5, 1}, {4, -1}, {2, -1}},
+//                                            {{4, -4}, {-7, -2}, {5, 4}},
+//                                            {{2, 2}, {4, 2}, {4,4}, {2, 4}},
+//                                            {{1, 1}, {3, 1}, {3, 3}, {1, 3}},
+//};
 
 std::vector<Point> general_inter() {
     std::vector<Point> inter = findIntersections(polygons[0], polygons[1]);
@@ -256,7 +270,47 @@ void DisableOpenGL(HWND hwnd, HDC hDC, HGLRC hRC) {
     ReleaseDC(hwnd, hDC);
 }
 
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    AllocConsole();
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+
+    // ввод координат
+    std::cout << "Enter polygons in format 'polygon(x0,y0,x1,y1,x2,y2,...)', enter 'intersect()' to finish:\n";
+    std::string input;
+    while (true) {
+        std::getline(std::cin, input);
+        if (input == "intersect()")
+            break;
+        addPolygon(input);
+    }
+
+    // вывод общей площади пересечения
+    std::vector<Point> generalIntersection = general_inter();
+    if (generalIntersection.empty()) {
+        std::cout << "General intersection is empty" << std::endl;
+    }
+    else {
+        std::cout << "Coordinates of the general intersection area:" << std::endl;
+        for (int i = 0; i < generalIntersection.size(); i++) {
+            if (i > 0){
+                if (is_point_on_line(generalIntersection[i - 1],
+                                     generalIntersection[(i + 1) % generalIntersection.size()],
+                                     generalIntersection[i])){
+                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
+                }
+            }
+            else{
+                if (is_point_on_line(generalIntersection[generalIntersection.size() - 1], generalIntersection[0], generalIntersection[1])){
+                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
+                }
+            }
+
+        }
+    }
+
     WNDCLASSEX wcex;
     HWND hwnd;
     HDC hDC;
@@ -293,14 +347,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 DispatchMessage(&msg);
             }
         } else {
+
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             float tick = 0.1f / 10.0f;
-
-
             float colorIncrement = 1.0f / (polygons.size() + 1);
             for (size_t i = 0; i < polygons.size(); ++i) {
                 glBegin(GL_POLYGON);
@@ -374,27 +427,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     DisableOpenGL(hwnd, hDC, hRC);
     DestroyWindow(hwnd);
-    std::vector<Point> generalIntersection = general_inter();
-    if (generalIntersection.empty()) {
-        std::cout << "General intersection is empty" << std::endl;
-    }
-    else {
-        std::cout << "Coordinates of the general intersection area:" << std::endl;
-        for (int i = 0; i < generalIntersection.size(); i++) {
-            if (i > 0){
-                if (is_point_on_line(generalIntersection[i - 1],
-                                      generalIntersection[(i + 1) % generalIntersection.size()],
-                                      generalIntersection[i])){
-                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
-                }
-            }
-            else{
-                if (is_point_on_line(generalIntersection[generalIntersection.size() - 1], generalIntersection[0], generalIntersection[1])){
-                    std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
-                }
-            }
-
-        }
-    }
     return msg.wParam;
 }
