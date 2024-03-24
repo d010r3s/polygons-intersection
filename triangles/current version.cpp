@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 struct Point {
     double x, y;
@@ -24,6 +25,23 @@ double fixNegZero(double value) {
         return 0.0;
     }
     return value;
+}
+
+std::vector<std::vector<Point>> triangles;
+
+void addTriangle(const std::string& input) { // парсер
+    std::vector<Point> triangle;
+    std::istringstream iss(input);
+    std::string token;
+    std::getline(iss, token, '(');
+    while (std::getline(iss, token, ',')) {
+        double x = std::stod(token);
+        if (!std::getline(iss, token, ','))
+            break;
+        double y = std::stod(token);
+        triangle.push_back(Point(x, y));
+    }
+    triangles.push_back(triangle);
 }
 
 std::vector<Point> delete_duplicates(const std::vector<Point>& points) { //n^2
@@ -181,30 +199,26 @@ void sortPoints(std::vector<Point>& points) {
 
 
 
-
-std::vector<std::vector<Point>> triangles = {{{6, 0}, {3, 6}, {0,0}},
-                                             {{1, 0}, {1, 5}, {6,0}},
-
-                                             {{4, -4}, {7, -2}, {5, 4}}};
-void general_inter(){ // нахождение общей фигуры пересечения и вывод вершин
+//
+//std::vector<std::vector<Point>> triangles = {{{6, 0}, {3, 6}, {0,0}},
+//                                             {{1, 0}, {1, 5}, {6,0}},
+//
+//                                             {{4, -4}, {7, -2}, {5, 4}}};
+std::vector<Point> general_inter() {
     std::vector<Point> inter = findIntersections(triangles[0], triangles[1]);
-
-
-    for (int i = 2; i < triangles.size(); i++){
+    for (int i = 2; i < triangles.size(); i++) {
         inter = findIntersections(inter, triangles[i]);
-        if (inter.empty()){
-            std::cout<<"General intersection is empty" << std::endl;
-            break;
-        }
-
-
-
-    }
-    if (!(inter.empty())){
-        for (int i = 0; i < inter.size(); i++){
-            std::cout << std::fixed << std::setprecision(3) << fixNegZero(inter[i].x) << ' ' << fixNegZero(inter[i].y) << std::endl;
+        if (inter.empty()) {
+            return {};
         }
     }
+
+    // cортировка точек общего пересечения
+    if (!inter.empty()) {
+        sortPoints(inter);
+    }
+
+    return inter;
 }
 
 
@@ -254,6 +268,22 @@ void DisableOpenGL(HWND hwnd, HDC hDC, HGLRC hRC) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+
+    AllocConsole();
+    freopen("CONIN$", "r", stdin);
+    freopen("CONOUT$", "w", stdout);
+    freopen("CONOUT$", "w", stderr);
+
+    // ввод координат
+    std::cout << "Enter triangles in format 'triangle(x0,y0,x1,y1,x2,y2,...)', enter 'intersect()' to finish:\n";
+    std::string input;
+    while (true) {
+        std::getline(std::cin, input);
+        if (input == "intersect()")
+            break;
+        addTriangle(input);
+    }
+
     WNDCLASSEX wcex;
     HWND hwnd;
     HDC hDC;
@@ -347,14 +377,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                 for (const auto& point : intersections[i]) glVertex2f(point.x / 10.0f, point.y / 10.0f);
                 glEnd();
             }
-
+            // отрисовка области общего пересечения белым
+            std::vector<Point> commonIntersection = general_inter();
+            if (!commonIntersection.empty()) {
+                glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+                glBegin(GL_POLYGON);
+                for (const auto& point : commonIntersection) glVertex2f(point.x / 10.0f, point.y / 10.0f);
+                glEnd();
+            }
             SwapBuffers(hDC);
         }
     }
 
     DisableOpenGL(hwnd, hDC, hRC);
     DestroyWindow(hwnd);
-    general_inter();
+    std::vector<Point> generalIntersection = general_inter();
+    if (generalIntersection.empty()) {
+        std::cout << "General intersection is empty" << std::endl;
+    }
+    else {
+        std::cout << "Coordinates of the general intersection area:" << std::endl;
+        for (const auto &point : generalIntersection) {
+            std::cout << "(" << fixNegZero(point.x) << ", " << fixNegZero(point.y) << ")" << std::endl;
+        }
+    }
 
     return msg.wParam;
 }
