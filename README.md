@@ -5,7 +5,7 @@
 * [Theoretical aspects](#theoretical-aspects)
 * [Functional aspects](#functional-aspects)
 * [Project structure](#project-structure)
-* [Example](#examples)
+* [Example](#example)
 
 ## Terms of Reference
 ### 1st version
