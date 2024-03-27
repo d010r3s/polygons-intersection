@@ -11,6 +11,96 @@ struct Point {
     Point(double x = 0, double y = 0) : x(x), y(y) {}
 };
 
+bool comparePoints(Point first_point, Point second_point) {
+    return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
+}
+
+bool operator == (const Point& point, const Point& point2) {
+    return point.x == point2.x && point.y == point2.y;
+}
+
+int compare_relatively_min(Point min_p, Point q, Point r) {
+    int res = (q.y - min_p.y) * (r.x - q.x) - (q.x - min_p.x) * (r.y - q.y);
+    if (res == 0) {
+        return 0;
+    }
+    if (res > 0){
+        return 1;
+    }
+    return 2;
+}
+
+void sortVertex(std::vector<Point>& points) { // сортировка вершин многоугольника против часовой стрелки
+    std::sort(points.begin(), points.end(), comparePoints);
+
+    Point p0 = points[0];
+    std::sort(points.begin() + 1, points.end(), [p0](Point a, Point b) {
+        int res = compare_relatively_min(p0, a, b);
+        if (res == 0) {
+            return (a.x + a.y < b.x + b.y);
+        }
+        return (res == 2);
+    });
+}
+
+bool is_point_on_line(const Point t0, const Point t1, const Point a) {
+    double eq1 = (a.x - t0.x)/(t1.x - t0.x);
+    double eq2 = (a.y - t0.y)/(t1.y - t0.y);
+    if ((eq1 == eq2) || (a.x == t0.x && a.x == t1.x)) {
+        return false;
+    }
+    return true;
+}
+
+bool is_polygon_correct(std::vector<Point>& polygon) {
+    sortVertex(polygon);
+    int count_minus = 0;
+    int count_plus = 0;
+    int size = polygon.size();
+    for (int i = 1; i < polygon.size(); i++){
+        double side_1_x = polygon[i % size].x - polygon[(i - 1) % size].x;
+        double side_1_y = polygon[i % size].y - polygon[(i - 1) % size].y;
+        double side_2_x = polygon[(i+1) % size].x - polygon[i % size].x;
+        double side_2_y = polygon[(i+1) % size].y - polygon[i % size].y;
+        if ((side_1_x * side_2_y - side_1_y * side_2_x) >= 0) {
+            count_plus ++;
+        }
+        else {
+            count_minus ++;
+        }
+    }
+    if (count_plus == 0 || count_minus == 0) {
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
+
+bool is_3points_on_side(std::vector<Point>& polygon) {
+    sortVertex(polygon);
+    int size = polygon.size();
+    bool flag = true;
+    for (int i = 0; i < size; i++){
+        if (i > 0){
+            if (!is_point_on_line(polygon[i - 1],
+                                  polygon[(i + 1) % size],
+                                      polygon[i])){
+                flag = false;
+                break;
+            }
+        }
+        else{
+            if (!is_point_on_line(polygon[size - 1], polygon[0], polygon[1])){
+                flag = false;
+                break;
+            }
+        }
+    }
+    return flag;
+}
+
 std::vector<std::vector<Point>> polygons;
 
 void addPolygon(const std::string& input) { // парсер
@@ -18,23 +108,33 @@ void addPolygon(const std::string& input) { // парсер
     std::istringstream iss(input);
     std::string token;
     std::getline(iss, token, '(');
+    bool flag_of_even = true;
     while (std::getline(iss, token, ',')) {
         double x = std::stod(token);
-        if (!std::getline(iss, token, ','))
+        if (!std::getline(iss, token, ',')) {
+            std::cout << "Error! Please enter even number of coordinates\n";
+            flag_of_even = false;
             break;
+        }
         double y = std::stod(token);
         polygon.push_back(Point(x, y));
     }
-    polygons.push_back(polygon);
-}
+    if (polygon.size() < 3){
+        std::cout << "Error! Please enter at least 3 points\n";
+    }
+    else if (flag_of_even){
+        if(!is_3points_on_side(polygon)){
+            std::cout << "Error! 3 points should not lie on a same line\n";
+        }
+        else if (!is_polygon_correct(polygon)) {
+            std::cout << "Error! Please enter a convex polygon\n";
 
-bool comparePoints(Point first_point, Point second_point) {
-    return (first_point.x < second_point.x) || (first_point.x == second_point.x && first_point.y < second_point.y);
-}
+        }
+        else{
+            polygons.push_back(polygon);
+        }
 
-bool operator == (const Point& point, const Point& point2)
-{
-    return point.x == point2.x && point.y == point2.y;
+    }
 }
 
 double fixNegZero(double value) {
@@ -42,16 +142,6 @@ double fixNegZero(double value) {
         return 0.0;
     }
     return value;
-}
-bool is_point_on_line(const Point t0, const Point t1, const Point a){
-    double eq1 = (a.x - t0.x)/(t1.x - t0.x);
-    double eq2 = (a.y - t0.y)/(t1.y - t0.y);
-    if ((eq1 == eq2) || (a.x == t0.x && a.x == t1.x)){
-        return false;
-    }
-
-    return true;
-
 }
 
 std::vector<Point> delete_duplicates(const std::vector<Point>& points){ //n^2
@@ -71,35 +161,6 @@ std::vector<Point> delete_duplicates(const std::vector<Point>& points){ //n^2
     }
     return res;
 }
-
-
-
-int compare_relatively_min(Point min_p, Point q, Point r) {
-    int res = (q.y - min_p.y) * (r.x - q.x) - (q.x - min_p.x) * (r.y - q.y);
-    if (res == 0) {
-        return 0;
-    }
-    if (res > 0){
-        return 1;
-    }
-    return 2;
-
-}
-
-void sortVertex(std::vector<Point>& points) { // сортировка вершин многоугольника против часовой стрелки
-    std::sort(points.begin(), points.end(), comparePoints);
-
-    Point p0 = points[0];
-    std::sort(points.begin() + 1, points.end(), [p0](Point a, Point b) {
-        int res = compare_relatively_min(p0, a, b);
-        if (res == 0) {
-            return (a.x + a.y < b.x + b.y);
-        }
-        return (res == 2);
-    });
-}
-
-
 
 bool isPointInsidePolygon(const std::vector<Point>& points, const Point& c) {
     bool res = false;
@@ -151,6 +212,7 @@ std::pair<bool, Point> findIntersection(const Point& A, const Point& B, const Po
 
 std::vector<Point> findIntersections(const std::vector<Point>& polygon1, const std::vector<Point>& polygon2) {
     std::vector<Point> intersections;
+
     for (int i = 0; i < polygon1.size(); ++i) {
         for (int j = 0; j < polygon2.size(); ++j) {
             auto result = findIntersection(polygon1[i], polygon1[(i + 1) % polygon1.size()], polygon2[j],polygon2[(j + 1) % polygon2.size()]);
@@ -159,16 +221,19 @@ std::vector<Point> findIntersections(const std::vector<Point>& polygon1, const s
             }
         }
     }
+
     for (const auto& vertex : polygon1) {
         if (isPointInsidePolygon(polygon2, vertex)) {
             intersections.push_back(vertex);
         }
     }
+
     for (const auto& vertex : polygon2) {
         if (isPointInsidePolygon(polygon1, vertex)) {
             intersections.push_back(vertex);
         }
     }
+
     if (!(intersections.empty())) {
         sortVertex(intersections);
         intersections = delete_duplicates(intersections);
@@ -180,12 +245,15 @@ std::vector<Point> findIntersections(const std::vector<Point>& polygon1, const s
 Point Centroid(const std::vector<Point>& points) {
     Point centroid;
     double sumX = 0, sumY = 0;
+
     for (const auto& p : points) {
         sumX += p.x;
         sumY += p.y;
     }
+
     centroid.x = sumX / points.size();
     centroid.y = sumY / points.size();
+
     return centroid;
 }
 
@@ -195,6 +263,7 @@ double calculateAngle(const Point& centroid, const Point& point) {
 
 void sortPoints(std::vector<Point>& points) {
     Point centroid = Centroid(points);
+
     std::sort(points.begin(), points.end(), [&centroid](const Point& a, const Point& b) {
         return calculateAngle(centroid, a) < calculateAngle(centroid, b);
     });
@@ -218,9 +287,11 @@ std::vector<Point> general_inter() {
 
     // cортировка точек общего пересечения
     if (!inter.empty()) {
-        sortPoints(inter);
+        Point centroid = Centroid(inter);
+        std::sort(inter.begin(), inter.end(), [&centroid](const Point& a, const Point& b) {
+            return calculateAngle(centroid, a) < calculateAngle(centroid, b);
+        });
     }
-
     return inter;
 }
 
@@ -278,10 +349,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     freopen("CONOUT$", "w", stderr);
 
     // ввод координат
-    std::cout << "Enter polygons in format 'polygon(x0,y0,x1,y1,x2,y2,...)', enter 'intersect()' to finish:\n";
+    std::cout << "Hi there! I will help you find intersection area of multiple polygons. \n" <<
+                 "Ask me and you shall receive! \n" <<
+                 "Although you should keep in mind a couple of rules: polygons must be convex and entered in the following format: \n" <<
+                 "'polygon(x0,y0,x1,y1,x2,y2,...)'. When all polygons are entered, type 'intersect()'.\n" <<
+                 "Of course, the number of coordinates entered must be even, and 3 points should not be lying on the same line.\n" <<
+                 "The coordinates themselves must be finite real numbers from -10 to 10 with a dot ('.') as a decimal separator. \n" <<
+                 "Don't forget the brackets! \n" <<
+                 "Input: ";
+
     std::string input;
     while (true) {
         std::getline(std::cin, input);
+        if (input[input.size() - 1] != ')'){
+            std::cout << "Error! Please enter closing bracket at the end of the string\n";
+            std::getline(std::cin, input);
+        }
         if (input == "intersect()")
             break;
         addPolygon(input);
