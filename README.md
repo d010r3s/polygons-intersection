@@ -1,4 +1,4 @@
-# Polygons Intersection - 5th AMI's sophomore year c++ project 
+# Polygons Intersection - 5th AMI's sophomore year C++ project 
 :robot: :robot: :robot:
 ## Table of contents
 * [Terms of reference](#terms-of-reference)
