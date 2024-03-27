@@ -5,7 +5,7 @@
 * [Theoretical aspects](#theoretical-aspects)
 * [Functional aspects](#functional-aspects)
 * [Project structure](#project-structure)
-* [Examples](#examples)
+* [Example](#examples)
 
 ## Terms of Reference
 ### 1st version
@@ -56,3 +56,4 @@ The entire code (in the ~~flesh~~ symbols) itself.
 We use this for testing. It contains specific cases to demonstrate functionality.
 
 ## Examples
+![funny picture](https://github.com/d010r3s/polygons-intersection/assets/104917935/ea30c904-a3c9-40e1-9161-54155f569ea5)
