@@ -4,6 +4,8 @@
 * [Terms of reference](#terms-of-reference)
 * [Theoretical aspects](#theoretical-aspects)
 * [Functional aspects](#functional-aspects)
+* [Project structure](#project-structure)
+* [Examples](#examples)
 
 ## Terms of Reference
 ### 1st version
@@ -40,3 +42,17 @@ We utilize OpenGL for rendering polygons.
 
 ### Interaction
 We interact with the user through a console interface, then a graphical window displays the polygons and their intersections.
+
+## Project structure
+Project consists of two files and tests. 
+
+### CMake file (CMakeLists.txt)
+We use this to manage the build process.
+
+### Main C++ file (main.cpp)
+The entire code (in the ~~flesh~~ symbols) itself.
+
+### Tests file (tests.txt)
+We use this for testing. It contains specific cases to demonstrate functionality.
+
+## Examples
