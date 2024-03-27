@@ -18,25 +18,25 @@
 ![confused math lady](https://i.kym-cdn.com/entries/icons/original/000/021/464/14608107_1180665285312703_1558693314_n.jpg)
 
 ### Polygon convexity check
-This is verified by checking the cross product of vectors formed by consecutive edges.
+We verify this by checking the cross product of vectors formed by consecutive edges.
 
 ### Sorting vertices
 Vertices of a polygon are sorted counter-clockwise.
 
 ### Lines intersection
-The code uses the parametric equation of a line and solves for the intersection point.
+We use the parametric equation of a line and solve for the intersection point.
 
 ### Polygon intersection
-The intersection of polygons involves calculating the points where edges intersect and determining which parts of the polygons contribute to the intersected area.
+We calculate the points where edges intersect and determine which parts of the polygons contribute to the intersected area.
 	
 ## Functional aspects
 ![user](https://i.imgur.com/2rqNKnh.png)
 
 ### User input
-The program checks for correct input format, validates the geometric properties of the polygons and provides feedback on input errors.
+We check for correct input format, validate the geometric properties of the polygons and provide feedback on input errors.
 
 ### Graphical representation
-Utilizes OpenGL for rendering polygons.
+We utilize OpenGL for rendering polygons.
 
 ### Interactivity
-The program interacts with the user through a console interface, a graphical window displays the polygons and their intersections.
+We interact with the user through a console interface, then a graphical window displays the polygons and their intersections.
