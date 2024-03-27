@@ -119,21 +119,19 @@ void addPolygon(const std::string& input) { // парсер
         double y = std::stod(token);
         polygon.push_back(Point(x, y));
     }
-    if (polygon.size() < 3){
+    if (polygon.size() < 3) {
         std::cout << "Error! Please enter at least 3 points\n";
     }
-    else if (flag_of_even){
-        if(!is_3points_on_side(polygon)){
+    else if (flag_of_even) {
+        if (!is_3points_on_side(polygon)) {
             std::cout << "Error! 3 points should not lie on a same line\n";
         }
         else if (!is_polygon_correct(polygon)) {
             std::cout << "Error! Please enter a convex polygon\n";
-
         }
-        else{
+        else {
             polygons.push_back(polygon);
         }
-
     }
 }
 
@@ -365,8 +363,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             std::cout << "Error! Please enter closing bracket at the end of the string\n";
             std::getline(std::cin, input);
         }
-        if (input == "intersect()")
+        if (input == "intersect()" and polygons.size() < 2) {
+            std::cout << "Error! Please enter at least 2 polygons.\n";
+            return 0;
+        }
+        else if (input == "intersect()" and polygons.size() >= 2) {
             break;
+        }
         addPolygon(input);
     }
 
@@ -378,20 +381,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     else {
         std::cout << "Coordinates of the general intersection area:" << std::endl;
         for (int i = 0; i < generalIntersection.size(); i++) {
-            if (i > 0){
+            if (i > 0) {
                 if (is_point_on_line(generalIntersection[i - 1],
                                      generalIntersection[(i + 1) % generalIntersection.size()],
                                      generalIntersection[i])){
                     std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
                 }
             }
-            else{
+            else {
                 if (is_point_on_line(generalIntersection[generalIntersection.size() - 1], generalIntersection[0], generalIntersection[1])){
                     std::cout << "(" << fixNegZero(generalIntersection[i].x) << ", " << fixNegZero(generalIntersection[i].y) << ")" << std::endl;
                 }
             }
-
         }
+        std::cout << "Thank you for using our project! \n" <<
+                     "Learn how this works in our GitHub: https://github.com/d010r3s/polygons-intersection";
     }
 
     WNDCLASSEX wcex;
