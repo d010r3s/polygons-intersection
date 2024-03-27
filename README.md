@@ -56,4 +56,6 @@ The entire code (in the ~~flesh~~ symbols) itself.
 We use this for testing. It contains specific cases to demonstrate functionality.
 
 ## Examples
-![funny picture](https://github.com/d010r3s/polygons-intersection/assets/104917935/ea30c904-a3c9-40e1-9161-54155f569ea5)
+![funny picture1](https://github.com/d010r3s/polygons-intersection/assets/104917935/ea30c904-a3c9-40e1-9161-54155f569ea5)
+![funny picture2](https://github.com/d010r3s/polygons-intersection/assets/104917935/10530b03-e7f9-451b-af14-60cdd8e8712f)
+
