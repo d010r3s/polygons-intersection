@@ -17,16 +17,16 @@
 
 ![confused math lady](https://i.kym-cdn.com/entries/icons/original/000/021/464/14608107_1180665285312703_1558693314_n.jpg)
 
-### Polygon convexity check
+### Checking polygon convexity 
 We verify this by checking the cross product of vectors formed by consecutive edges.
 
 ### Sorting vertices
 Vertices of a polygon are sorted counter-clockwise.
 
-### Lines intersection
+### Intersecting lines
 We use the parametric equation of a line and solve for the intersection point.
 
-### Polygon intersection
+### Intersecting polygon
 We calculate the points where edges intersect and determine which parts of the polygons contribute to the intersected area.
 	
 ## Functional aspects
@@ -38,5 +38,5 @@ We check for correct input format, validate the geometric properties of the poly
 ### Graphical representation
 We utilize OpenGL for rendering polygons.
 
-### Interactivity
+### Interaction
 We interact with the user through a console interface, then a graphical window displays the polygons and their intersections.
